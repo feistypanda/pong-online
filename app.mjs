@@ -1,15 +1,16 @@
 
+import ejs from 'ejs';
 import express from 'express';
 import path from 'path';
 
 const port = 8000;
 const app = express();
 
-
-app.use('/static', express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'ejs');
+app.set('views', './public/views');
 
 app.get('/', (req, res) => {
-	res.send('Hello World!');
+	res.render('index', { title: "index", message: 'Hola' });
 });
 
 app.listen(port, () => {

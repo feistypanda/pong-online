@@ -1,0 +1,28 @@
+:root {
+
+  	--orange: #FF6B01;
+  	--white: #FFFFFF;
+  	--black: #353535;
+}
+
+body {
+	margin: 0px;
+	padding: 0px;
+
+	background-color: var(--black);
+
+	font-family: "roboto";
+	color: var(--white);
+}
+
+#nav {
+	display: flex;
+	padding: 2rem;
+
+	background-color: var(--orange);
+
+}
+
+.nav-item {
+	
+}
