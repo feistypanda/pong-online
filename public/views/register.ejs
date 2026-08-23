@@ -7,45 +7,58 @@
 		<h1>Register</h1>
 	</div>
 
-    <form action="/register" method="post">
+    
 	    <div class="mb-3">
-	        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Username" type="text">
+	        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" placeholder="Username" type="text" id="username">
 	    </div>
 	    <div class="mb-3">
-	        <input class="form-control mx-auto w-auto" name="password" placeholder="Password" type="password">
+	        <input class="form-control mx-auto w-auto" placeholder="Password" type="password" id="password">
 	    </div>
 	    <div class="mb-3">
-	        <input class="form-control mx-auto w-auto" name="confirmation" placeholder="Confirm" type="password">
+	        <input class="form-control mx-auto w-auto" placeholder="Confirm" type="password" id="confirmation">
 	    </div>
-	    <button class="btn btn-primary" type="submit">Register</button>
-	</form>
+	    <button class="btn btn-primary" id="submit">Register</button>
+	
 	<p id="errors"></p>
 </main>
 
 <script>
 
 	// Prevent inputs from submitting forms and auto focus on the next input
-	(() => {
-		const inputs = document.querySelectorAll("input");
+	const inputs = document.querySelectorAll("input");
 
-		for (let i = 0; i < inputs.length - 1; i ++) {
-			inputs[i].addEventListener("keydown", event => {
-				if (event.keyCode === 13) {
-					event.preventDefault();
-					inputs[i + 1].focus();
-				}
-			})
-		}
-	})();
+	for (let i = 0; i < inputs.length - 1; i ++) {
+		inputs[i].addEventListener("keydown", event => {
+			if (event.keyCode === 13) {
+				inputs[i + 1].focus();
+			}
+		})
+	}
 
-	// Get error messages from url
-	(() => {
-		const output = document.querySelector("#errors");
-		const params = new URL(window.location.href).searchParams;
-		const error = params.get("e");
+	inputs[inputs.length - 1].addEventListener("keydown", event => {
+		if (event.keyCode === 13) register();
+	});
 
-		if (error) output.innerHTML = error;
-	})();
+	document.querySelector("#submit").addEventListener("click", register);
+
+	async function register () {
+		
+		const username = document.querySelector("#username").value;
+		const password = document.querySelector("#password").value;
+		const confirmation = document.querySelector("#confirmation").value;
+
+		const response = await fetch('/register', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ username, password, confirmation })
+		});
+
+		const data = await response.json();
+
+		if (response.ok) window.location.replace("./");
+		else document.querySelector("#errors").innerHTML = data.error;
+	}
+
 </script>
 
 <%- include('partials/footer') %>
