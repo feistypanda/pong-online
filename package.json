@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "ejs": "^6.0.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongodb": "^7.5.0"
   },
   "name": "pong-online",
   "version": "1.0.0",
