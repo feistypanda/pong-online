@@ -11,14 +11,41 @@
 	    <div class="mb-3">
 	        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Username" type="text">
 	    </div>
-	    <!-- <div class="mb-3">
+	    <div class="mb-3">
 	        <input class="form-control mx-auto w-auto" name="password" placeholder="Password" type="password">
 	    </div>
 	    <div class="mb-3">
 	        <input class="form-control mx-auto w-auto" name="confirmation" placeholder="Confirm" type="password">
-	    </div> -->
+	    </div>
 	    <button class="btn btn-primary" type="submit">Register</button>
 	</form>
+	<p id="errors"></p>
 </main>
+
+<script>
+
+	// Prevent inputs from submitting forms and auto focus on the next input
+	(() => {
+		const inputs = document.querySelectorAll("input");
+
+		for (let i = 0; i < inputs.length - 1; i ++) {
+			inputs[i].addEventListener("keydown", event => {
+				if (event.keyCode === 13) {
+					event.preventDefault();
+					inputs[i + 1].focus();
+				}
+			})
+		}
+	})();
+
+	// Get error messages from url
+	(() => {
+		const output = document.querySelector("#errors");
+		const params = new URL(window.location.href).searchParams;
+		const error = params.get("e");
+
+		if (error) output.innerHTML = error;
+	})();
+</script>
 
 <%- include('partials/footer') %>

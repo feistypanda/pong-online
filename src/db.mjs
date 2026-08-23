@@ -41,3 +41,4 @@ export function getCollection (collectionName) {
 
   	return database.collection(collectionName);
 }
+
