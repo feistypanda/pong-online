@@ -1,5 +1,6 @@
 
 <%- include('partials/header') %>
+<%- include('partials/refresh-script') %>
 
 <main class="container py-5 text-center">
 
@@ -55,8 +56,12 @@
 
 		const data = await response.json();
 
-		if (response.ok) window.location.replace("./");
-		else document.querySelector("#errors").innerHTML = data.error;
+		if (response.ok) {
+			localStorage.setItem("refreshToken", data.refreshToken)
+			window.location.replace("./");
+		} else {
+			document.querySelector("#errors").innerHTML = data.error;
+		}
 	}
 
 </script>

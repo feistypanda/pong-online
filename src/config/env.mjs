@@ -1,10 +1,10 @@
 export default {
 	accessToken: {
-		secret: "ooh secret",
-		expiresIn: 24,
+		secret: "ooh ssdsdfaafecret",
+		expiresIn: 900,
 	},
 	refreshToken: {
 		secret: "ooh another",
-		expiresIn: "7d",
+		expiresIn: 10080,
 	},
 };

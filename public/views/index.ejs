@@ -2,9 +2,11 @@
 <%- include('partials/header') %>
 
 <div style="padding: 2rem;">
-	<ul>
+	<% if (user) {%>
 	
-	</ul>
+	<h1>Logged in as '<%= user.username %>'</h1>
+
+	<% } %>
 </div>
 
 <%- include('partials/footer') %>

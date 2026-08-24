@@ -1,0 +1,31 @@
+
+<script>	
+	async function refreshToken () {
+		const token = localStorage.getItem("refreshToken");
+
+		if (!token) return false;
+
+		const response = await fetch('/refresh', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ refreshToken: token })
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) localStorage.removeItem("refreshToken");
+
+		return response.ok;
+	}
+
+	async function refresh () {
+		const refreshed = await refreshToken();
+
+		if (refreshed) {
+			return window.location.replace("./");
+		}
+	}
+
+	refresh();
+
+</script>

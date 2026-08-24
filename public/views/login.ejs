@@ -1,5 +1,6 @@
 
 <%- include('partials/header') %>
+<%- include('partials/refresh-script') %>
 
 <main class="container py-5 text-center">
 
@@ -20,23 +21,8 @@
 
 <script>
 
-	// Prevent inputs from submitting forms and auto focus on the next input
-	const inputs = document.querySelectorAll("input");
-
-	for (let i = 0; i < inputs.length - 1; i ++) {
-		inputs[i].addEventListener("keydown", event => {
-			if (event.keyCode === 13) inputs[i + 1].focus();
-		})
-	}
-
-	inputs[inputs.length - 1].addEventListener("keydown", event => {
-		if (event.keyCode === 13) login();
-	});
-
-	document.querySelector("#submit").addEventListener("click", login);
-
 	async function login () {
-		
+
 		const username = document.querySelector("#username").value;
 		const password = document.querySelector("#password").value;
 
@@ -48,9 +34,36 @@
 
 		const data = await response.json();
 
-		if (response.ok) window.location.replace("./");
-		else document.querySelector("#errors").innerHTML = data.error;
+		if (response.ok) {
+			localStorage.setItem("refreshToken", data.refreshToken)
+			window.location.replace("./");
+		} else {
+			document.querySelector("#errors").innerHTML = data.error;
+		}
 	}
+
+	async function main () {
+
+		
+
+		// Prevent inputs from submitting forms and auto focus on the next input
+		const inputs = document.querySelectorAll("input");
+
+		for (let i = 0; i < inputs.length - 1; i ++) {
+			inputs[i].addEventListener("keydown", event => {
+				if (event.keyCode === 13) inputs[i + 1].focus();
+			})
+		}
+
+		inputs[inputs.length - 1].addEventListener("keydown", event => {
+			if (event.keyCode === 13) login();
+		});
+
+		document.querySelector("#submit").addEventListener("click", login);
+
+	}
+
+	main();
 </script>
 
 <%- include('partials/footer') %>

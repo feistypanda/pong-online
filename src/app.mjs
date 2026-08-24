@@ -5,8 +5,9 @@ import authMiddleWare from './middleware/auth.mjs';
 import cookieParser from 'cookie-parser';
 import ejs from 'ejs';
 import express from 'express';
-import { logInUser, registerUser } from './controllers/authController.mjs'
+import { logInUser, registerUser, refresh, logout } from './controllers/authController.mjs'
 import * as db from './db/db.mjs';
+import { ObjectId } from 'mongodb'
 
 const port = 8000;
 const app = express();
@@ -17,47 +18,56 @@ app.use(cookieParser());
 app.set('view engine', 'ejs');
 app.set('views', '../public/views');
 
+function getUserData (req) {
+	const users = db.getCollection('users');
+	const id = new ObjectId(req.user.id);
+	return users.findOne({_id: id});
+}
 
 // Index
-app.get('/', async (req, res) => {
+app.get('/', authMiddleWare, async (req, res) => {
 
-	// const userData = await getJWT(req.cookies.token);
-	
-	// const username = userData.username;
+	const user = await getUserData(req);
 
-	// const users = db.getCollection("users");
-	// const user = await users.findOne({ username });
-
-	res.render('index', { "title": "index", "user": false});
+	res.render('index', { "title": "index", user});
 });
 
 // Login
 app.get('/login', async (req, res) => {
-	res.render('login', { title: "login" });
+	res.render('login', { title: "login", user: false });
 });
 
 app.post('/login', logInUser);
 
 // Logout
 app.get('/logout', authMiddleWare, async (req, res) => {
-	return res.redirect('/login');
+
+	const user = await getUserData(req);
+	res.render('logout', { "title": "log out", user });
 })
+
+app.post('/logout', authMiddleWare, logout)
 
 // Register
 app.get('/register', async (req, res) => {
-	res.render('register', { title: "register" });
+	res.render('register', { title: "register", user: false });
 });
 
 app.post('/register', registerUser);
 
+// Refresh token
+app.post('/refresh', refresh);
+
 // Play
 app.get('/play', authMiddleWare, async (req, res) => {
-	res.render('play', { title: "play" });
+	const user = await getUserData(req);
+	res.render('play', { title: "play", user });
 });
 
 // Stats
 app.get('/stats', authMiddleWare, async (req, res) => {
-	res.render('stats', { title: "stats" });
+	const user = await getUserData(req);
+	res.render('stats', { title: "stats", user });
 });
 
 async function startServer () {

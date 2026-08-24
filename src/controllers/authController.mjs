@@ -1,20 +1,27 @@
 
 import * as passwordUtils from '../utils/passwordUtils.mjs';
 import * as db from '../db/db.mjs';
+import { ObjectId } from 'mongodb'
 import config from "../config/env.mjs";
 
-import { getToken } from "../utils/tokenUtils.mjs";
+import { getToken, verifyToken } from "../utils/tokenUtils.mjs";
 
 async function logIn (req, res) {
-	const token = await getToken(req.user.username);
+	
+	const token = await getToken(req.user);
+	const refreshToken = await getToken({id: req.user.id}, true);
 
 	res.cookie('token', token, {
 		httpOnly: true,
-		maxAge: 1000 * 60 * 60 * config.accessToken.expiresIn,
+		maxAge: 1000 * config.accessToken.expiresIn,
 	});
 
-	res.json({ message: 'Login successful' });
+	const refreshTokens = await db.getCollection('refreshTokens');
+	await refreshTokens.insertOne({userId: req.user.id, refreshToken});
+
+	res.json({ refreshToken, message: 'Login successful' });
 }
+
 
 export async function logInUser (req, res) {
 
@@ -34,7 +41,7 @@ export async function logInUser (req, res) {
 	const passwordValid = await passwordUtils.compare(password, user.hash);
 	if (!passwordValid) return res.status(400).json({ error: 'username and/or password incorrect' });
 
-	req.user = { username }
+	req.user = { username, id: user._id };
 	logIn(req, res);
 }
 
@@ -51,16 +58,57 @@ export async function registerUser (req, res) {
 
 	// Check username availability
 	const users = db.getCollection("users");
-	const found = await users.find({username});
-	const foundArr = await found.toArray();
+	const foundCursor = await users.find({username});
+	const found = await foundCursor.toArray();
 
-	if (foundArr.length > 0) return res.status(400).json({ error: `username '${username}' is taken` });
+	if (found.length > 0) return res.status(400).json({ error: `username '${username}' is taken` });
 	
 	const hash = await passwordUtils.hash(password);
 
 	// Store user in database
-	users.insertOne({username, hash})
+	await users.insertOne({username, hash});
 
-	req.user = { username }
+	// get the id
+	const user = await users.findOne({username});
+	console.log (user);
+
+	req.user = { username, id: user._id };
 	logIn(req, res);
+}
+
+export async function refresh (req, res) {
+	const { refreshToken } = req.body;
+
+	try {
+		const decoded = await verifyToken(refreshToken, true);
+
+		const id = new ObjectId(decoded.id);
+		const refreshTokens = await db.getCollection('refreshTokens').find({ userId: id, refreshToken });
+		const arr = await refreshTokens.toArray();
+
+		if (arr.length <= 0) return res.status(400).json({ error: 'Refresh token revoked' });
+
+		const user = await db.getCollection('users').findOne({ _id: id });
+
+		const token = await getToken({ username: user.username, id: decoded.id });
+
+		res.cookie('token', token, {
+			httpOnly: true,
+			maxAge: 1000 * config.accessToken.expiresIn,
+		});
+
+		res.json({ message: "success!" });
+	} catch (e) {
+		return res.status(400).json({ error: 'Invalid refresh token' });
+	}
+}
+
+export async function logout (req, res) {
+
+	const id = new ObjectId(req.user.id);
+	await db.getCollection('refreshTokens').deleteMany({userId: id});
+
+	res.clearCookie('token', { httpOnly: true });
+
+	return res.redirect('/login');
 }
