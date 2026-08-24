@@ -1,2 +1,2 @@
 
-CLAUDE (AI) helped come up with the overall plan
+CLAUDE (AI) helped come up with the overall plan, helped make jwt use cookies
