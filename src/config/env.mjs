@@ -5,6 +5,6 @@ export default {
 	},
 	refreshToken: {
 		secret: "ooh another",
-		expiresIn: 10080,
+		expiresIn: 43200,
 	},
 };

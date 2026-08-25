@@ -7,10 +7,16 @@ import ejs from 'ejs';
 import express from 'express';
 import { logInUser, registerUser, refresh, logout } from './controllers/authController.mjs'
 import * as db from './db/db.mjs';
-import { ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb';
+import { webSocketServer, verifyWSSConnection } from './wss/server.mjs';
+
+
+import http from 'http';
 
 const port = 8000;
 const app = express();
+const server = http.createServer(app);
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -23,6 +29,9 @@ function getUserData (req) {
 	const id = new ObjectId(req.user.id);
 	return users.findOne({_id: id});
 }
+
+// app routes
+(() => {
 
 // Index
 app.get('/', authMiddleWare, async (req, res) => {
@@ -68,13 +77,15 @@ app.get('/play', authMiddleWare, async (req, res) => {
 app.get('/stats', authMiddleWare, async (req, res) => {
 	const user = await getUserData(req);
 	res.render('stats', { title: "stats", user });
-});
+});})();
+
+server.on('upgrade', verifyWSSConnection);
 
 async function startServer () {
 	try {
 		await db.connectToDatabase();
 
-		app.listen(port, () => {
+		server.listen(port, () => {
 			console.log(`Listening on port ${port}`);
 		});
 	} catch (e) {

@@ -1,7 +1,7 @@
 
 import { MongoClient } from 'mongodb';
 
-const dbURI = 'mongodb://127.0.0.1:53317/?directConnection=true';
+const dbURI = 'mongodb://127.0.0.1:52258/?directConnection=true';
 
 let client;
 let database;

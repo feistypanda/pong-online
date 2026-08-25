@@ -1,8 +1,47 @@
 
 <%- include('partials/header') %>
 
-<div>
-<h1> Play </h1>
-</div>
+<main class="container py-5 text-center">
+
+	<div>
+		<h1>Messages<br></h1>
+	</div>
+
+	<div class="mb-3">
+		<input class="form-control mx-auto w-auto" id="message" placeholder="Message" type="text">
+	</div>
+	<button class="btn btn-primary" id="send">Send</button>
+
+	<div id="messages"></div>
+</main>
+
+<script>
+
+	const accessToken = localStorage.getItem("accessToken");
+	const ws = new WebSocket('ws://192.168.1.175:8000', [accessToken]);
+
+	ws.onopen = () => {
+		console.log("connected");
+	}
+	
+	ws.onmessage = async (event) => {
+		const messages = document.getElementById('messages');
+		const newMessage = document.createElement('div');
+
+		newMessage.textContent = event.data;
+		messages.appendChild(newMessage);
+	};
+
+	ws.onclose = () => {
+		console.log('disconnected');
+	};
+
+	document.getElementById('send').addEventListener('click', () => {
+		const input = document.getElementById('message');
+		ws.send(input.value);
+		input.value = '';
+	});
+	
+</script>
 
 <%- include('partials/footer') %>

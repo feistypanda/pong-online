@@ -19,7 +19,7 @@ async function logIn (req, res) {
 	const refreshTokens = await db.getCollection('refreshTokens');
 	await refreshTokens.insertOne({userId: req.user.id, refreshToken});
 
-	res.json({ refreshToken, message: 'Login successful' });
+	res.json({ accessToken: token, refreshToken, message: 'Login successful' });
 }
 
 
@@ -70,7 +70,6 @@ export async function registerUser (req, res) {
 
 	// get the id
 	const user = await users.findOne({username});
-	console.log (user);
 
 	req.user = { username, id: user._id };
 	logIn(req, res);
@@ -86,7 +85,7 @@ export async function refresh (req, res) {
 		const refreshTokens = await db.getCollection('refreshTokens').find({ userId: id, refreshToken });
 		const arr = await refreshTokens.toArray();
 
-		if (arr.length <= 0) return res.status(400).json({ error: 'Refresh token revoked' });
+		if (arr.length <= 0) return res.status(400).json({ error: 'Refresh token revoked' }); 
 
 		const user = await db.getCollection('users').findOne({ _id: id });
 
@@ -97,7 +96,7 @@ export async function refresh (req, res) {
 			maxAge: 1000 * config.accessToken.expiresIn,
 		});
 
-		res.json({ message: "success!" });
+		res.json({ accessToken: token, message: "success!" });
 	} catch (e) {
 		return res.status(400).json({ error: 'Invalid refresh token' });
 	}

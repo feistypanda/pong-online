@@ -35,7 +35,9 @@
 		const data = await response.json();
 
 		if (response.ok) {
-			localStorage.setItem("refreshToken", data.refreshToken)
+			localStorage.setItem("refreshToken", data.refreshToken);
+			console.log(data.accessToken);
+			localStorage.setItem("accessToken", data.accessToken);
 			window.location.replace("./");
 		} else {
 			document.querySelector("#errors").innerHTML = data.error;
@@ -44,7 +46,6 @@
 
 	async function main () {
 
-		
 
 		// Prevent inputs from submitting forms and auto focus on the next input
 		const inputs = document.querySelectorAll("input");
