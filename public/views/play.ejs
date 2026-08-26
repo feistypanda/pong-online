@@ -148,8 +148,6 @@ const scenes = (() => {
 				noStroke();
 				fill(200);
 
-				console.log(gameState.status);
-
 				if (gameState.status === "waiting") return scenes.nextTransition = ["waiting", get, 1];
 				if (gameState.status === "over") return scenes.nextTransition = ["gameOver", get, 1];
 
@@ -233,7 +231,7 @@ const scenes = (() => {
 					else fill(200, 50, 50);
 
 					textSize(90);
-					text(`${players[iAm].toUpperCase()} WINS!!`, width/2, 400);
+					text(`${players[winner].toUpperCase()} WINS!!`, width/2, 400);
 
 				} else if (reason === 'win') {
 
@@ -241,7 +239,7 @@ const scenes = (() => {
 					else fill(200, 50, 50);
 
 					textSize(90);
-					text(`${players[iAm].toUpperCase()} WINS!!`, width/2, 320);
+					text(`${players[winner].toUpperCase()} WINS!!`, width/2, 320);
 					
 				}
 

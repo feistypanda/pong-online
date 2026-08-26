@@ -58,10 +58,6 @@ app.get('/logout', authMiddleWare, async (req, res) => {
 app.post('/logout', authMiddleWare, logout)
 
 // Register
-app.get('/register', async (req, res) => {
-	res.render('register', { title: "register", user: false });
-});
-
 app.post('/register', registerUser);
 
 // Refresh token

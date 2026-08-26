@@ -2,29 +2,53 @@
 <%- include('partials/header') %>
 <%- include('partials/refresh-script') %>
 
-<main class="container py-5 text-center">
+<div style="display: flex; flex-direction: row;">
 
-	<div>
-		<h1>Log In</h1>
-	</div>
+	<main class="container py-5 text-center">
+		<div>
+			<h1>Register</h1>
+		</div>
 
-    <div class="mb-3">
-        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" placeholder="Username" type="text">
-    </div>
-    <div class="mb-3">
-        <input class="form-control mx-auto w-auto" id="password" placeholder="Password" type="password">
-    </div>
-    <button class="btn btn-primary" id="submit">Log In</button>
+		
+			<div class="mb-3">
+				<input autocomplete="off" autofocus class="register form-control mx-auto w-auto" placeholder="Username" type="text" id="register-username">
+			</div>
+			<div class="mb-3">
+				<input class="register form-control mx-auto w-auto" placeholder="Password" type="password" id="register-password">
+			</div>
+			<div class="mb-3">
+				<input class="register form-control mx-auto w-auto" placeholder="Confirm" type="password" id="register-confirmation">
+			</div>
+			<button class="btn btn-primary" id="register">Register</button>
+		
+		<p id="register-errors" class="errors"></p>
+	</main>
 
-	<p id="errors"></p>
-</main>
+	<main class="container py-5 text-center">
+
+		<div>
+			<h1>Log In</h1>
+		</div>
+
+		<div class="mb-3">
+			<input autocomplete="off" autofocus class="login form-control mx-auto w-auto" id="login-username" placeholder="Username" type="text">
+		</div>
+		<div class="mb-3">
+			<input class="form-control mx-auto w-auto login" id="login-password" placeholder="Password" type="password">
+		</div>
+		<button class="btn btn-primary" id="login">Log In</button>
+
+		<p id="login-errors" class="errors"></p>
+	</main>
+
+</div>
 
 <script>
 
 	async function login () {
 
-		const username = document.querySelector("#username").value;
-		const password = document.querySelector("#password").value;
+		const username = document.querySelector("#login-username").value;
+		const password = document.querySelector("#login-password").value;
 
 		const response = await fetch('/login', {
 			method: 'POST',
@@ -36,32 +60,57 @@
 
 		if (response.ok) {
 			localStorage.setItem("refreshToken", data.refreshToken);
-			console.log(data.accessToken);
 			localStorage.setItem("accessToken", data.accessToken);
 			window.location.replace("./");
 		} else {
-			document.querySelector("#errors").innerHTML = data.error;
+			document.querySelector("#login-errors").innerHTML = data.error;
+		}
+	}
+
+	async function register () {
+		
+		const username = document.querySelector("#register-username").value;
+		const password = document.querySelector("#register-password").value;
+		const confirmation = document.querySelector("#register-confirmation").value;
+
+		const response = await fetch('/register', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ username, password, confirmation })
+		});
+
+		const data = await response.json();
+
+		if (response.ok) {
+			localStorage.setItem("refreshToken", data.refreshToken);
+			localStorage.setItem("accessToken", data.accessToken);
+			window.location.replace("./");
+		} else {
+			document.querySelector("#register-errors").innerHTML = data.error;
+		}
+	}
+
+	function setUpAutoFocus (elements) {
+		for (let i = 0; i < elements.length - 1; i ++) {
+			elements[i].addEventListener("keydown", event => {
+				if (event.keyCode === 13) elements[i + 1].focus();
+			})
 		}
 	}
 
 	async function main () {
+		// auto focus on the next input
+		setUpAutoFocus(document.querySelectorAll('.register'));
+		setUpAutoFocus(document.querySelectorAll('.login'));
 
+		const lastRegisterInput = document.querySelector('#register-confirmation');
+		const lastLoginInput = document.querySelector('#login-password');
+		
+		lastRegisterInput.addEventListener("keydown", event => event.keyCode === 13 && register());
+		lastLoginInput.addEventListener("keydown", event => event.keyCode === 13 && login());
 
-		// Prevent inputs from submitting forms and auto focus on the next input
-		const inputs = document.querySelectorAll("input");
-
-		for (let i = 0; i < inputs.length - 1; i ++) {
-			inputs[i].addEventListener("keydown", event => {
-				if (event.keyCode === 13) inputs[i + 1].focus();
-			})
-		}
-
-		inputs[inputs.length - 1].addEventListener("keydown", event => {
-			if (event.keyCode === 13) login();
-		});
-
-		document.querySelector("#submit").addEventListener("click", login);
-
+		document.querySelector("#login").addEventListener("click", login);
+		document.querySelector("#register").addEventListener("click", register);
 	}
 
 	main();

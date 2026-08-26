@@ -155,8 +155,6 @@ class Ball {
 	}
 }
 
-let lastLogged;
-
 export default class Game {
 	constructor () {
 		this.reset();
@@ -203,7 +201,6 @@ export default class Game {
 	}
 
 	addPlayer (socket) {
-		console.log(socket.username, "connected");
 		if (this.players.length >= 2 || this.over) return false;
 		
 		this.players.push(new Player(socket, this.players.length));
@@ -228,7 +225,6 @@ export default class Game {
 	}
 
 	disconnectPlayer (socket) {
-		console.log(socket.username, "disconnected");
 
 		if (this.over) return; // game already ended
 		this.over = true;
@@ -262,12 +258,6 @@ export default class Game {
 	run (dt) {
 
 		if (this.over) return;
-
-		let dat = this.players.map(x => x.username);
-		if (JSON.stringify(dat) !== lastLogged) {
-			lastLogged = JSON.stringify(dat);
-			console.log(dat);
-		}
 
 		if (!this.started) return this.sendData();
 
