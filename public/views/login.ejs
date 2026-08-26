@@ -61,7 +61,8 @@
 		if (response.ok) {
 			localStorage.setItem("refreshToken", data.refreshToken);
 			localStorage.setItem("accessToken", data.accessToken);
-			window.location.replace("./");
+			if (redirect) return window.location.replace(redirect);
+			else return window.location.replace("./");
 		} else {
 			document.querySelector("#login-errors").innerHTML = data.error;
 		}
@@ -84,7 +85,8 @@
 		if (response.ok) {
 			localStorage.setItem("refreshToken", data.refreshToken);
 			localStorage.setItem("accessToken", data.accessToken);
-			window.location.replace("./");
+			if (redirect) return window.location.replace(redirect);
+			else return window.location.replace("./");
 		} else {
 			document.querySelector("#register-errors").innerHTML = data.error;
 		}

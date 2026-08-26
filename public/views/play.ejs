@@ -181,68 +181,19 @@ const scenes = (() => {
 			return function () {
 
 				background(50);
-				noStroke();
-				fill(200);
+				
+				const dat = gameState;
 
-				if (gameState.status === "waiting") return scenes.nextTransition = ["waiting", get, 1];
-				if (gameState.status === "play") return scenes.nextTransition = ["play", get, 1];
+				const url = new URL(`http://${window.location.host}/results`);
+				const params = url.searchParams;
 
-				const players = gameState.usernames;
-				const iAm = gameState.iAm;
-				const reason = gameState.reason;
-				const winner = gameState.winner;
-				const score = gameState.score;
+				params.append('players', dat.usernames);
+				params.append('self', dat.iAm);
+				params.append('winner', dat.winner);
+				params.append('reason', dat.reason);
+				if (dat.reason === 'win') params.append('score', dat.score);
 
-				textSize(80);
-
-				textAlign(RIGHT, TOP);
-				fill(50, 50, 200);
-				text(players[iAm].toUpperCase(), width/2 - 60, 90);
-
-				textAlign(LEFT, TOP);
-				fill(200, 50, 50);
-				text(players[(iAm + 1) % players.length].toUpperCase(), width/2 + 60, 90);
-
-				textAlign(CENTER, TOP);
-				fill(200);
-				text("vs", width/2, 90);
-
-				textSize(50);
-
-				textAlign(RIGHT, TOP);
-				fill(50, 50, 200);
-				text(score[iAm], width/2 - 40, 200);
-
-				textAlign(LEFT, TOP);
-				fill(200, 50, 50);
-				text(score[(iAm + 1) % players.length], width/2 + 40, 200);
-
-
-				textAlign(CENTER, TOP);
-				fill(200);
-				text("-", width/2, 200);
-
-				if (reason === 'disconnect') {
-					const disconnected = gameState.disconnected;
-					
-					text(`${players[disconnected]} disconnected`, width/2, 280);
-
-					if (winner == iAm) fill(50, 50, 200);
-					else fill(200, 50, 50);
-
-					textSize(90);
-					text(`${players[winner].toUpperCase()} WINS!!`, width/2, 400);
-
-				} else if (reason === 'win') {
-
-					if (winner == iAm) fill(50, 50, 200);
-					else fill(200, 50, 50);
-
-					textSize(90);
-					text(`${players[winner].toUpperCase()} WINS!!`, width/2, 320);
-					
-				}
-
+				window.location.replace(url.toString());
 			}
 		})(),
 	};
@@ -301,8 +252,9 @@ const userInput = (() => {
     }
 })();
 
+
 const accessToken = localStorage.getItem("accessToken");
-const ws = new WebSocket('ws://192.168.1.175:8000', [accessToken]);
+const ws = new WebSocket(`ws://${window.location.host}`, [accessToken]);
 
 ws.onopen = () => {
 	console.log("connected");

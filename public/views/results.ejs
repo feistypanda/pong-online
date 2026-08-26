@@ -1,0 +1,35 @@
+
+<%- include('partials/header') %>
+
+<div style="padding: 4rem; display: flex; flex-direction: column; gap: 3rem; align-items: center;">
+
+	<h1 id="display"></h1>
+
+	<p id="score"></p>
+
+	<p>
+		<a class="btn btn-primary" href="./play">Play Again</a>
+	</p>
+</div>
+
+<script>
+	let params = new URL(document.location.toString()).searchParams;
+
+	let players = params.get('players').split(',');
+	let winner = +params.get('winner');
+	let self = +params.get('self');
+	let opponent = (self + 1) % players.length;	
+	let reason = params.get('reason');
+	let score = params.get('score')?.split(',');
+
+	const display = document.querySelector('#display');
+
+	if (winner === self) display.innerHTML = 'VICTORY!';
+	else display.innerHTML = 'DEFEAT!';
+
+	const scoreDisplay = document.querySelector('#score');
+	if (reason === 'win') scoreDisplay.innerHTML = `${players[self]}: ${score[self]} - ${players[opponent]}: ${score[opponent]}`;
+	else if (reason === 'disconnect') scoreDisplay.innerHTML = `${players[(winner + 1) % players.length]} disconnected`;
+</script>
+
+<%- include('partials/footer') %>

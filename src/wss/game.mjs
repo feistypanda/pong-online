@@ -2,6 +2,7 @@
 const width = 1000;
 const height = 600;
 
+let lastLogged;
 
 const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
 const AABB = (a, b) => a.position.x < b.position.x + b.width && a.position.x + a.width > b.position.x && a.position.y < b.position.y + b.height && a.position.y + a.height > b.position.y;
@@ -201,6 +202,8 @@ export default class Game {
 	}
 
 	addPlayer (socket) {
+
+		console.log(socket.username, "connected");
 		if (this.players.length >= 2 || this.over) return false;
 		
 		this.players.push(new Player(socket, this.players.length));
@@ -214,7 +217,6 @@ export default class Game {
 			i.sendToSocket({
 				status: 'over',
 				reason: 'disconnect',
-				disconnected,
 				score: this.score,
 				winner: (disconnected + 1) % this.players.length,
 				usernames: this.players.map(x => x.username),
@@ -225,6 +227,8 @@ export default class Game {
 	}
 
 	disconnectPlayer (socket) {
+
+		console.log(socket.username, "disconnected");
 
 		if (this.over) return; // game already ended
 		this.over = true;
@@ -256,6 +260,12 @@ export default class Game {
 	
 
 	run (dt) {
+
+		let dat = this.players.map(x => x.username);
+		if (lastLogged !== JSON.stringify(dat)) {
+			console.log(dat);
+			lastLogged = JSON.stringify(dat);
+		}
 
 		if (this.over) return;
 

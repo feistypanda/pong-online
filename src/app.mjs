@@ -10,7 +10,6 @@ import * as db from './db/db.mjs';
 import { ObjectId } from 'mongodb';
 import { webSocketServer, verifyWSSConnection } from './wss/server.mjs';
 
-
 import http from 'http';
 
 const port = 8000;
@@ -66,7 +65,7 @@ app.post('/refresh', refresh);
 // Play
 app.get('/play', authMiddleWare, async (req, res) => {
 	const user = await getUserData(req);
-	res.render('play', { title: "play", user });
+	res.render('play', { title: "play", user});
 });
 
 // Stats
@@ -75,6 +74,12 @@ app.get('/stats', authMiddleWare, async (req, res) => {
 	res.render('stats', { title: "stats", user });
 });})();
 
+// Results
+app.get('/results', authMiddleWare, async (req, res) => {
+	const user = await getUserData(req);
+	res.render('results', { title: "results", user });
+})
+
 server.on('upgrade', verifyWSSConnection);
 
 async function startServer () {
@@ -82,7 +87,7 @@ async function startServer () {
 		await db.connectToDatabase();
 
 		server.listen(port, () => {
-			console.log(`Listening on port ${port}`);
+			console.log(`Server running on port ${port}`);
 		});
 	} catch (e) {
 		throw(e);

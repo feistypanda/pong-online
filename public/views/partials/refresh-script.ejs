@@ -1,5 +1,9 @@
 
-<script>	
+<script>
+
+	let params = new URL(document.location.toString()).searchParams;
+	let redirect = params.get('redirecturl');
+
 	async function refreshToken () {
 		const token = localStorage.getItem("refreshToken");
 
@@ -23,7 +27,9 @@
 		const refreshed = await refreshToken();
 
 		if (refreshed) {
-			return window.location.replace("./");
+
+			if (redirect) return window.location.replace(redirect);
+			else return window.location.replace("./");
 		}
 	}
 
