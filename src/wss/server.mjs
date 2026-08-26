@@ -1,5 +1,7 @@
+
 import { WebSocketServer } from 'ws';
 import { verifyToken } from '../utils/tokenUtils.mjs';
+import Game from './game.mjs';
 
 export const wsPort = 8001;
 export const webSocketServer = new WebSocketServer({ noServer: true });
@@ -23,25 +25,35 @@ export function verifyWSSConnection (request, socket, head) {
 	})
 }
 
-const clients = new Set();
+let game = new Game();
+
+let then = performance.now();
+
+let gameLoop = setInterval(() => {
+	
+	let now = performance.now();
+	let dt = now - then;
+	then = now;
+
+	game.run(dt)
+
+	if (game.over) game.reset();
+}, 30);
 
 webSocketServer.on('connection', (socket) => {
 
-	clients.add(socket);
+	const result = game.addPlayer(socket);
 
-	socket.on('message', (message) => {
-		clients.forEach((client) => {
-			if (client.readyState === WebSocket.OPEN) {
-				client.send(`${socket.username}: ${message}`);
-			}
+	if (!result) {
+		socket.write('Lobby full');
+		socket.destroy();
+	} else {
+		socket.on('close', () => {
+			game.disconnectPlayer(socket);
 		});
-	});
 
-	socket.on('close', () => {
-		clients.delete(socket);
-	});
-
-	socket.on('error', (error) => {
-	    console.error(`Socket error: ${error.message}`);
-	});
+		socket.on('error', (error) => {
+		    console.error(`Socket error: ${error.message}`);
+		});
+	}
 });

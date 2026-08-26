@@ -2,46 +2,327 @@
 <%- include('partials/header') %>
 
 <main class="container py-5 text-center">
-
-	<div>
-		<h1>Messages<br></h1>
-	</div>
-
-	<div class="mb-3">
-		<input class="form-control mx-auto w-auto" id="message" placeholder="Message" type="text">
-	</div>
-	<button class="btn btn-primary" id="send">Send</button>
-
-	<div id="messages"></div>
 </main>
+
+<script src="https://cdn.jsdelivr.net/gh/NS236/p5.js-ka@main/lib/p5.js"></script>
+<script> new p5();</script>
 
 <script>
 
-	const accessToken = localStorage.getItem("accessToken");
-	const ws = new WebSocket('ws://192.168.1.175:8000', [accessToken]);
+const [WIDTH, HEIGHT] = [1000, 600];
 
-	ws.onopen = () => {
-		console.log("connected");
-	}
+let delataTime = 33;
+let click = false;
+let keys = {};
+
+let gameState = 'waiting';
+
+const scenes = (() => {
+
+	const startScene = "waiting";
+
+	// returns an object with a function for each scene and a function that runs the current scene. This function will also transition to a new scene at the end of the frame if necesary.
+	// the reason that the scene functions are the way they are(an iife returning a function) is so that each scene can have a local scope to store data that is only relevant to the scene.
+
+	return {
+		current: startScene,
+
+		run () {
+			this[this.current](); // run the current scene
+
+			click = false;
+
+			if (scenes.nextTransition) { // transition
+				scenes.nextTransition[1] = scenes.nextTransition[1](); // get the image of the canvas at the time of the start of the transition
+				scenes.transition(...scenes.nextTransition)
+			};
+		},
+
+		nextTransition: false,
+		transitionTo: false, // so buttons can display during the transition
 	
-	ws.onmessage = async (event) => {
-		const messages = document.getElementById('messages');
-		const newMessage = document.createElement('div');
+		transition: (() => {
+		
+			const anim1 = x => 4 *(x - 0.5) ** 3 + 0.5;
 
-		newMessage.textContent = event.data;
-		messages.appendChild(newMessage);
-	};
-
-	ws.onclose = () => {
-		console.log('disconnected');
-	};
-
-	document.getElementById('send').addEventListener('click', () => {
-		const input = document.getElementById('message');
-		ws.send(input.value);
-		input.value = '';
-	});
+			let fromImg;
+			let to = "";
+			let amt = 0;
+			let speed = 1;
+			let data = false;
+			let sentData = false;
+			let transitionType = "slide";
+			let transitionData = false;
 	
+			return function (_to, img, _speed, _transitionType = "slide", _data, _transitionData) {
+	
+				amt += (delataTime)/1000/speed;
+				
+				if (_to) {
+
+					// so we dont try to transition twice
+					scenes.nextTransition = false;
+					
+					// reset data for the transition
+					to = _to;
+					scenes.transitionTo = to;
+					transitionType = _transitionType;
+					fromImg = img;
+					scenes.current = "transition";
+					amt = 0;
+					data = _data || false;
+					transitionData = _transitionData || false;
+					sentData = false;
+
+					if (_speed && _speed > 0) speed = _speed;
+				}
+	
+				if (amt < 0.5) {
+					// display image from last scene
+					image(fromImg, 0, 0, width, height);
+				} else if (amt < 1){
+					// run the next scene
+					if (sentData) {
+						scenes[to]();
+					} else {
+						scenes[to](data);
+						sentData = true;
+					}
+					
+				} else {
+					// switch to the next scene
+					scenes.current = to;
+					scenes.transitionTo = false;
+				}
+
+				// the gray square that sweeps over the screen
+				fill(220);
+				noStroke();
+				rect(-width + width * anim1(amt) * 2, 0, width, height);
+				
+			}
+		})(),
+		
+		waiting: (() => {
+
+			const getMsg = (() => {
+				let frames = 0;
+
+				return function () {
+
+					frames ++;
+
+					let cycleLen = 120;
+					let cycle = frames % cycleLen;
+
+					let num = Math.min(Math.floor((cycle < cycleLen/2 ? cycle : (cycleLen - cycle))/12), 4);
+
+					let dots = '';
+
+					for (let i = 0; i < num; i ++) dots += '.';
+
+					return 'waiting for players' + dots;
+				}
+			})();
+			
+
+			return function () {
+				background(50);
+				
+				fill(200);
+				noStroke();
+
+				textAlign(CENTER, CENTER);
+				textSize(70);
+				textFont('Arial Black');
+				text(getMsg(), width/2, 250);
+
+				if (gameState.status === "game") return scenes.nextTransition = ["play", get, 1];
+				if (gameState.status === "over") return scenes.nextTransition = ["gameOver", get, 1];
+			}
+		})(),
+
+		play: (() => {
+			return function () {
+				background(50);
+				noStroke();
+				fill(200);
+
+				console.log(gameState.status);
+
+				if (gameState.status === "waiting") return scenes.nextTransition = ["waiting", get, 1];
+				if (gameState.status === "over") return scenes.nextTransition = ["gameOver", get, 1];
+
+				for (let i = 0; i < gameState.playerPositions.length; i ++) {
+					const p = gameState.playerPositions[i];
+					const w = gameState.playerW[i];
+					const h = gameState.playerH[i];
+
+					rect (p.x - w/2, p.y - h/2, w, h);
+				}
+
+				let bP = gameState.ballPosition;
+				let bS = gameState.ballSize;
+
+				rect(bP.x - bS/2, bP.y - bS/2, bS, bS);
+
+				textSize(40);
+
+				textAlign(LEFT, TOP);
+				text(gameState.usernames[0], 40, 40);
+
+				textAlign(RIGHT, TOP);
+				text(gameState.usernames[1], width - 40, 40);
+
+				textAlign(CENTER, TOP);
+				text(`${gameState.score[0]} - ${gameState.score[1]}`, width/2, 40);
+			}
+		})(),
+
+		gameOver: (() => {
+			return function () {
+
+				background(50);
+				noStroke();
+				fill(200);
+
+				if (gameState.status === "waiting") return scenes.nextTransition = ["waiting", get, 1];
+				if (gameState.status === "play") return scenes.nextTransition = ["play", get, 1];
+
+				const players = gameState.usernames;
+				const iAm = gameState.iAm;
+				const reason = gameState.reason;
+				const winner = gameState.winner;
+				const score = gameState.score;
+
+				textSize(80);
+
+				textAlign(RIGHT, TOP);
+				fill(50, 50, 200);
+				text(players[iAm].toUpperCase(), width/2 - 60, 90);
+
+				textAlign(LEFT, TOP);
+				fill(200, 50, 50);
+				text(players[(iAm + 1) % players.length].toUpperCase(), width/2 + 60, 90);
+
+				textAlign(CENTER, TOP);
+				fill(200);
+				text("vs", width/2, 90);
+
+				textSize(50);
+
+				textAlign(RIGHT, TOP);
+				fill(50, 50, 200);
+				text(score[iAm], width/2 - 40, 200);
+
+				textAlign(LEFT, TOP);
+				fill(200, 50, 50);
+				text(score[(iAm + 1) % players.length], width/2 + 40, 200);
+
+
+				textAlign(CENTER, TOP);
+				fill(200);
+				text("-", width/2, 200);
+
+				if (reason === 'disconnect') {
+					const disconnected = gameState.disconnected;
+					
+					text(`${players[disconnected]} disconnected`, width/2, 280);
+
+					if (winner == iAm) fill(50, 50, 200);
+					else fill(200, 50, 50);
+
+					textSize(90);
+					text(`${players[iAm].toUpperCase()} WINS!!`, width/2, 400);
+
+				} else if (reason === 'win') {
+
+					if (winner == iAm) fill(50, 50, 200);
+					else fill(200, 50, 50);
+
+					textSize(90);
+					text(`${players[iAm].toUpperCase()} WINS!!`, width/2, 320);
+					
+				}
+
+			}
+		})(),
+	};
+})();
+	
+const drawFunction = (() => {
+
+	// for delta time calculations
+	let then = performance.now();
+
+	// not using function x() {} notation because iife. iife is simply for organization here
+	setup = function() {
+	
+		// this clears all animation frames preventing them from stacking up if the webpage is reloaded
+		// sourced from stack overflow somewhere
+		let id = window.requestAnimationFrame(function(){});
+		while (id--) {
+			window.cancelAnimationFrame(id);
+		}
+		
+		createCanvas(WIDTH, HEIGHT);
+		frameRate(60);
+	};
+	
+	draw = function() {
+
+		let now = performance.now();
+		delataTime = now - then;
+		then = now;
+
+		scenes.run();
+	};
+})();
+
+const userInput = (() => {
+    // not using function x() {} notation because iife. iife is simply for organization here
+
+    mousePressed = function() {
+        click = true;
+    }
+
+    function sendDirection () {
+    	if (keys.w && keys.s || !keys.w && !keys.s) sendMessage ('');
+    	else if (keys.w) sendMessage ('up');
+    	else if (keys.s) sendMessage ('down');
+    }
+
+    keyPressed = function() {
+        keys[key] = keys[key.toString().toLowerCase()] = true;
+        sendDirection();
+    }
+    
+    keyReleased = function() {
+        keys[key] = keys[key.toString().toLowerCase()] = false;
+		sendDirection();
+    }
+})();
+
+const accessToken = localStorage.getItem("accessToken");
+const ws = new WebSocket('ws://192.168.1.175:8000', [accessToken]);
+
+ws.onopen = () => {
+	console.log("connected");
+}
+
+ws.onmessage = async (event) => {
+	gameState = JSON.parse(event.data);
+};
+
+ws.onclose = () => {
+	console.log('disconnected');
+};
+
+function sendMessage (msg) {
+	ws.send(msg);
+}
+
 </script>
+
 
 <%- include('partials/footer') %>
