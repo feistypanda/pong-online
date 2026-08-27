@@ -1,6 +1,46 @@
 
-<%- include('partials/header') %>
-<%- include('partials/refresh-script') %>
+<%- include('partials/header-top') %>
+
+<script>
+
+	let params = new URL(document.location.toString()).searchParams;
+	let redirect = params.get('redirecturl');
+
+	async function refreshToken () {
+		const token = localStorage.getItem("refreshToken");
+
+		if (!token) return false;
+
+		const response = await fetch('/refresh', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ refreshToken: token })
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) localStorage.removeItem("refreshToken");
+		if (response.ok) localStorage.setItem("accessToken", data.accessToken);
+
+		return response.ok;
+	}
+
+	async function refresh () {
+		const refreshed = await refreshToken();
+
+		if (refreshed) {
+
+			if (redirect) return window.location.replace(redirect);
+			else return window.location.replace("./");
+		}
+	}
+
+	refresh();
+
+</script>
+
+<%- include('partials/login-styles') %>
+<%- include('partials/header-bottom') %>
 
 <div style="display: flex; flex-direction: row;">
 

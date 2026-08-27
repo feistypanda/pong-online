@@ -1,5 +1,7 @@
 
-<%- include('partials/header') %>
+<%- include('partials/header-top') %>
+<%- include('partials/results-styles') %>
+<%- include('partials/header-bottom') %>
 
 <div style="padding: 4rem; display: flex; flex-direction: column; gap: 3rem; align-items: center;">
 
@@ -8,7 +10,7 @@
 	<p id="score"></p>
 
 	<p>
-		<a class="btn btn-primary" href="./play">Play Again</a>
+		<a id="play-again" class="btn btn-primary" href="./play">Play Again?</a>
 	</p>
 </div>
 

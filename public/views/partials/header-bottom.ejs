@@ -1,0 +1,27 @@
+<title><%= title %></title>
+	</head>
+	<body style="background: rgb(30, 30, 40); color: rgb(220, 220, 220);">
+
+		<nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary">
+			<div class="container-fluid">
+				<a class="navbar-brand" href="./">Pong</a>
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item"> <a class="nav-link" href="./play">Play</a> </li>
+					<li class="nav-item"> <a class="nav-link" href="./stats">Stats</a> </li>
+				</ul>
+				
+				<% if (user) {%>
+
+				<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+					<li class="nav-item"> <a class="nav-link" href="./logout"><%= user.username %> - Log out</a> </li>
+				</ul>
+				
+				<% } else { %>
+				
+				<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+					<li class="nav-item"> <a class="nav-link" href="./login">Log In</a> </li>
+				</ul>
+				
+				<% } %>
+			</div>
+		</nav>

@@ -96,7 +96,7 @@ const scenes = (() => {
 				}
 
 				// the gray square that sweeps over the screen
-				fill(220);
+				fill(30, 30, 40);
 				noStroke();
 				rect(-width + width * anim1(amt) * 2, 0, width, height);
 				
@@ -253,24 +253,38 @@ const userInput = (() => {
 })();
 
 
-const accessToken = localStorage.getItem("accessToken");
-const ws = new WebSocket(`ws://${window.location.host}`, [accessToken]);
+let sendMessage;
+let connected = false;
 
-ws.onopen = () => {
-	console.log("connected");
+function connectToServer () {
+
+	if (connected) return false;
+
+	const accessToken = localStorage.getItem("accessToken");
+	const ws = new WebSocket(`ws://${window.location.host}`, [accessToken]);
+
+	ws.onopen = () => {
+		console.log("connected");
+		connected = true;
+	}
+
+	ws.onmessage = async (event) => {
+		gameState = JSON.parse(event.data);
+	};
+
+	ws.onclose = () => {
+		console.log('disconnected');
+		connected = false;
+	};
+
+	sendMessage = function (msg) {
+		ws.send(msg);
+	}
+
+	return true;
 }
 
-ws.onmessage = async (event) => {
-	gameState = JSON.parse(event.data);
-};
-
-ws.onclose = () => {
-	console.log('disconnected');
-};
-
-function sendMessage (msg) {
-	ws.send(msg);
-}
+connectToServer();
 
 </script>
 
