@@ -5,11 +5,6 @@ import Game from './game.mjs';
 import * as db from '../db/db.mjs';
 import calculateELO from '../utils/elo.mjs';
 
-const wsUrl = process.env.NODE_ENV === 'production'
-  ? 'wss://your-service-name.onrender.com'
-  : 'ws://localhost:8000';
-
-const ws = new WebSocket(wsUrl);
 export const webSocketServer = new WebSocketServer({ noServer: true });
 
 export function verifyWSSConnection (request, socket, head) {

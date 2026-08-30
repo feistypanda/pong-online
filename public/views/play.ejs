@@ -305,7 +305,7 @@ function connectToServer () {
 
 	const accessToken = localStorage.getItem("accessToken");
 	const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-	const ws = new WebSocket(`${protocol}//${window.location.host}`);
+	const ws = new WebSocket(`${protocol}//${window.location.host}`, [accessToken]);
 
 	ws.onopen = () => {
 		console.log("connected");

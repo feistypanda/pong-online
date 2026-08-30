@@ -21,7 +21,6 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 const server = http.createServer(app);
 
-
 app.use(express.json());
 app.use(cookieParser());
 
