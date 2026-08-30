@@ -10,7 +10,27 @@ import * as db from './db/db.mjs';
 import { ObjectId } from 'mongodb';
 import { webSocketServer, verifyWSSConnection } from './wss/server.mjs';
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 import http from 'http';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function logTree(dir, depth = 0) {
+  if (depth > 3) return;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    console.log('  '.repeat(depth) + entry.name);
+    if (entry.isDirectory() && entry.name !== 'node_modules') {
+      logTree(path.join(dir, entry.name), depth + 1);
+    }
+  }
+}
+
+console.log('--- __dirname is:', __dirname);
+console.log('--- Directory tree from __dirname/.. :');
+logTree(path.join(__dirname, '..'));
 
 const port = 8000;
 const app = express();
