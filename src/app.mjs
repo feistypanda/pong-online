@@ -11,7 +11,6 @@ import { ObjectId } from 'mongodb';
 import { webSocketServer, verifyWSSConnection } from './wss/server.mjs';
 
 import fs from 'fs';
-import path from 'path';
 import { fileURLToPath } from 'url';
 
 import http from 'http';
