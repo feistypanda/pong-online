@@ -17,20 +17,6 @@ import http from 'http';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-function logTree(dir, depth = 0) {
-  if (depth > 3) return;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    console.log('  '.repeat(depth) + entry.name);
-    if (entry.isDirectory() && entry.name !== 'node_modules') {
-      logTree(path.join(dir, entry.name), depth + 1);
-    }
-  }
-}
-
-console.log('--- __dirname is:', __dirname);
-console.log('--- Directory tree from __dirname/.. :');
-logTree(path.join(__dirname, '..'));
-
 const port = 8000;
 const app = express();
 const server = http.createServer(app);
@@ -40,7 +26,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.set('view engine', 'ejs');
-app.set('views', '../public/views');
+
+const viewsPath = path.join(__dirname, '../public/views');
+console.log('Resolved views path:', viewsPath, '| exists:', fs.existsSync(viewsPath));
+app.set('views', viewsPath);
 
 function getUserData (req) {
 	const users = db.getCollection('users');
