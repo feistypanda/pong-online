@@ -1,13 +1,19 @@
 
-<%- include('partials/header') %>
+<%- include('partials/header-top') %>
+<%- include('partials/footer-style-fixed') %>
+<%- include('partials/header-bottom') %>
 
-<main class="container py-5 text-center">
+<main class="text-center" style="padding-top: 3rem">
 </main>
 
 <script src="https://cdn.jsdelivr.net/gh/NS236/p5.js-ka@main/lib/p5.js"></script>
 <script> new p5();</script>
 
 <script>
+
+function redirect (url) {
+	window.location.replace(url);
+}
 
 const [WIDTH, HEIGHT] = [1000, 600];
 
@@ -16,6 +22,7 @@ let click = false;
 let keys = {};
 
 let gameState = 'waiting';
+let redirected = false;
 
 const scenes = (() => {
 
@@ -96,7 +103,7 @@ const scenes = (() => {
 				}
 
 				// the gray square that sweeps over the screen
-				fill(30, 30, 40);
+				fill(28, 28, 28);
 				noStroke();
 				rect(-width + width * anim1(amt) * 2, 0, width, height);
 				
@@ -143,14 +150,8 @@ const scenes = (() => {
 		})(),
 
 		play: (() => {
-			return function () {
-				background(50);
-				noStroke();
-				fill(200);
 
-				if (gameState.status === "waiting") return scenes.nextTransition = ["waiting", get, 1];
-				if (gameState.status === "over") return scenes.nextTransition = ["gameOver", get, 1];
-
+			function displayPlayers () {
 				for (let i = 0; i < gameState.playerPositions.length; i ++) {
 					const p = gameState.playerPositions[i];
 					const w = gameState.playerW[i];
@@ -158,13 +159,21 @@ const scenes = (() => {
 
 					rect (p.x - w/2, p.y - h/2, w, h);
 				}
+			}
+
+			function displayBall () {
+				if (gameState.countDown) return;
 
 				let bP = gameState.ballPosition;
 				let bS = gameState.ballSize;
 
 				rect(bP.x - bS/2, bP.y - bS/2, bS, bS);
+			}
 
+			function displayNames () {
 				textSize(40);
+				stroke(200);
+				strokeWeight(2);
 
 				textAlign(LEFT, TOP);
 				text(gameState.usernames[0], 40, 40);
@@ -175,10 +184,40 @@ const scenes = (() => {
 				textAlign(CENTER, TOP);
 				text(`${gameState.score[0]} - ${gameState.score[1]}`, width/2, 40);
 			}
+
+			function displayCountDown () {
+
+				const time = gameState.countDown;
+				
+				if (!time) return;
+				if (time < 3000 && time % 1000 < 300) return;
+				
+				textAlign(CENTER, CENTER);
+				textSize(70);
+				strokeWeight(3);
+				text(Math.min(3, Math.ceil(gameState.countDown/1000)), width/2, height/2);
+			}
+
+			return function () {
+				background(50);
+				noStroke();
+				fill(200);
+
+				if (gameState.status === "waiting") return scenes.nextTransition = ["waiting", get, 1];
+				if (gameState.status === "over") return scenes.nextTransition = ["gameOver", get, 1];
+
+				
+				displayPlayers();
+				displayBall();
+				displayNames();
+				displayCountDown();
+			}
 		})(),
 
 		gameOver: (() => {
 			return function () {
+
+				if (redirected) return;
 
 				background(50);
 				
@@ -192,8 +231,12 @@ const scenes = (() => {
 				params.append('winner', dat.winner);
 				params.append('reason', dat.reason);
 				if (dat.reason === 'win') params.append('score', dat.score);
+				if (dat.eloChange) params.append('elo', Math.round(dat.eloChange[dat.iAm]));
 
-				window.location.replace(url.toString());
+				console.log("attempting redirect");
+				redirect(url.toString());
+				redirected = true;
+				console.log("attempted redirect");
 			}
 		})(),
 	};
@@ -253,7 +296,7 @@ const userInput = (() => {
 })();
 
 
-let sendMessage;
+let sendMessage = x => x;
 let connected = false;
 
 function connectToServer () {
@@ -272,9 +315,13 @@ function connectToServer () {
 		gameState = JSON.parse(event.data);
 	};
 
-	ws.onclose = () => {
+	ws.onclose = (event) => {
 		console.log('disconnected');
 		connected = false;
+
+		if (event.reason === 'inactive') {
+			redirect('./results?timeout=true');
+		}
 	};
 
 	sendMessage = function (msg) {
@@ -285,6 +332,12 @@ function connectToServer () {
 }
 
 connectToServer();
+
+// ping the server
+
+let pinger = setInterval(x => {
+	sendMessage('ping');
+}, 200);
 
 </script>
 

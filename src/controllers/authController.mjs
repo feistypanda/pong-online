@@ -66,7 +66,7 @@ export async function registerUser (req, res) {
 	const hash = await passwordUtils.hash(password);
 
 	// Store user in database
-	await users.insertOne({username, hash});
+	await users.insertOne({username, hash, elo: 0});
 
 	// get the id
 	const user = await users.findOne({username});

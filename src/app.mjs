@@ -71,14 +71,25 @@ app.get('/play', authMiddleWare, async (req, res) => {
 // Stats
 app.get('/stats', authMiddleWare, async (req, res) => {
 	const user = await getUserData(req);
-	res.render('stats', { title: "stats", user });
+
+	const users = db.getCollection('users');
+	const sorted = await users.aggregate([{ $sort: { elo: -1 } }])
+	const arr = await sorted.toArray();
+
+	res.render('stats', { title: "stats", user, places: arr });
 });})();
 
 // Results
 app.get('/results', authMiddleWare, async (req, res) => {
 	const user = await getUserData(req);
 	res.render('results', { title: "results", user });
-})
+});
+
+// Elo
+app.get('/api/myelo', authMiddleWare, async (req, res) => {
+	const user = await getUserData(req);
+	res.send(isNaN(user.elo) ? 0 : user.elo);
+});
 
 server.on('upgrade', verifyWSSConnection);
 

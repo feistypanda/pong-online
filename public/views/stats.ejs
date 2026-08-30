@@ -1,8 +1,52 @@
 
-<%- include('partials/header') %>
+<%- include('partials/header-top') %>
+<style>
+	#title-container {
+		padding-bottom: 2rem;
+	}
 
-<div>
-	<h1>Stats</h1>
-</div>
+	#title {
+		font-size: 5rem;
+		font-weight: 800;
+	}
+
+	#leaderboard {
+		width: 60%;
+		margin: auto;
+		overflow: hidden;
+
+		border-radius: 5px;
+	}
+
+</style>
+<%- include('partials/header-bottom') %>
+
+<main class="container py-5 text-center">
+	<div id="title-container">
+		<h1 id="title">Leaderboard</h1>
+	</div>
+
+	<table class="table" id="leaderboard">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Username</th>
+				<th scope="col">Elo</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% for (let i = 0; i < places.length; i ++) { %>
+				<% if (!isNaN(places[i].elo)) { %>
+					<tr>
+						<th scope="row"><%= i + 1 %></th>
+						<td><%= places[i].username %></td>
+						<td><%= Math.round(places[i].elo) %></td>
+					</tr>
+				<% } %>
+			<% } %>
+		</tbody>
+	</table>
+
+</main>
 
 <%- include('partials/footer') %>
