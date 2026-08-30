@@ -151,38 +151,43 @@ const scenes = (() => {
 
 		play: (() => {
 
-			function displayPlayers () {
+			function displayPlayers (flip) {
 				for (let i = 0; i < gameState.playerPositions.length; i ++) {
 					const p = gameState.playerPositions[i];
 					const w = gameState.playerW[i];
 					const h = gameState.playerH[i];
 
-					rect (p.x - w/2, p.y - h/2, w, h);
+					let x = p.x;
+					if (flip) x = width - x;
+
+					rect (x - w/2, p.y - h/2, w, h);
 				}
 			}
 
-			function displayBall () {
+			function displayBall (flip) {
 				if (gameState.countDown) return;
 
 				let bP = gameState.ballPosition;
 				let bS = gameState.ballSize;
+				let x = bP.x;
+				if (flip) x = width - x;
 
-				rect(bP.x - bS/2, bP.y - bS/2, bS, bS);
+				rect(x - bS/2, bP.y - bS/2, bS, bS);
 			}
 
-			function displayNames () {
+			function displayNames (flip) {
 				textSize(40);
 				stroke(200);
 				strokeWeight(2);
 
 				textAlign(LEFT, TOP);
-				text(gameState.usernames[0], 40, 40);
+				text(gameState.usernames[flip], 40, 40);
 
 				textAlign(RIGHT, TOP);
-				text(gameState.usernames[1], width - 40, 40);
+				text(gameState.usernames[+(!flip)], width - 40, 40);
 
 				textAlign(CENTER, TOP);
-				text(`${gameState.score[0]} - ${gameState.score[1]}`, width/2, 40);
+				text(`${gameState.score[flip]} - ${gameState.score[+(!flip)]}`, width/2, 40);
 			}
 
 			function displayCountDown () {
@@ -206,10 +211,11 @@ const scenes = (() => {
 				if (gameState.status === "waiting") return scenes.nextTransition = ["waiting", get, 1];
 				if (gameState.status === "over") return scenes.nextTransition = ["gameOver", get, 1];
 
-				
-				displayPlayers();
-				displayBall();
-				displayNames();
+				const flip = gameState.iAm;
+
+				displayPlayers(flip);
+				displayBall(flip);
+				displayNames(flip);
 				displayCountDown();
 			}
 		})(),

@@ -25,10 +25,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.set('view engine', 'ejs');
-
-const viewsPath = path.join(__dirname, '../public/views');
-console.log('Resolved views path:', viewsPath, '| exists:', fs.existsSync(viewsPath));
-app.set('views', viewsPath);
+app.set('views', path.join(__dirname, '../public/views'));
 
 function getUserData (req) {
 	const users = db.getCollection('users');
