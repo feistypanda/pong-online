@@ -1,7 +1,6 @@
 
 import { MongoClient } from 'mongodb';
-
-const dbURI = 'mongodb://127.0.0.1:60538/?directConnection=true';
+import config from "../config/env.mjs";
 
 let client;
 let database;
@@ -11,7 +10,7 @@ async function _connectToDatabase () {
 	if (database) return database;
 
 	try {
-		client = new MongoClient(dbURI);
+		client = new MongoClient(config.db.uri);
 
 		// Conenct client
 		await client.connect();
