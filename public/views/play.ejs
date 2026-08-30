@@ -326,7 +326,7 @@ function connectToServer () {
 		console.log('disconnected');
 		connected = false;
 
-		if (event.reason !== 'game over') {
+		if (event.reason !== 'game over' && event.code === 1000) {
 			const url = new URL(`http://${window.location.host}/results`);
 			const params = url.searchParams;
 			params.append('disconnect', 'true');
