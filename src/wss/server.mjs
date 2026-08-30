@@ -45,6 +45,9 @@ let gameLoop = setInterval(() => {
 
 webSocketServer.on('connection', (socket) => {
 
+	// check to see if the player is already in a game
+	for (const i of games) for (const j of i.usernames) if (j === socket.username) return socket.close(1000, "Already in game")
+
 	let result = false;
 	let game;
 
@@ -55,17 +58,14 @@ webSocketServer.on('connection', (socket) => {
 		}
 	}
 
+	// create new game if necesary
 	if (!result) {
 		games.push(new Game());
 		game = games[games.length - 1];
 		result = game.addPlayer(socket);
 	}
 
-	if (!result) {
-		socket.write('Lobby full');
-		socket.destroy();
-		return;
-	}
+	if (!result) return socket.close(1000, "lobby full");
 
 	game.onOver(async (playerA, playerB, winner) => {
 		const users = db.getCollection('users');

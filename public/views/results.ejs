@@ -23,7 +23,12 @@
 	function main () {
 		let params = new URL(document.location.toString()).searchParams;
 
-		if (params.get('timeout')) return document.querySelector('#display').innerHTML = 'Disconnected';
+		if (params.get('disconnect')) {
+			document.querySelector('#display').innerHTML = 'Disconnected';
+			document.querySelector('#score').innerHTML = params.get('message') ?? '';
+			document.querySelector('#score').style.color = 'red';
+			return;
+		}
 
 		let players = params.get('players')?.split(',');
 		let winner = +params.get('winner');

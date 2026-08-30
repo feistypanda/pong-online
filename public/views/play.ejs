@@ -326,8 +326,12 @@ function connectToServer () {
 		console.log('disconnected');
 		connected = false;
 
-		if (event.reason === 'inactive') {
-			redirect('./results?timeout=true');
+		if (event.reason !== 'game over') {
+			const url = new URL(`http://${window.location.host}/results`);
+			const params = url.searchParams;
+			params.append('disconnect', 'true');
+			params.append('message', event.reason);
+			redirect(url.toString());
 		}
 	};
 

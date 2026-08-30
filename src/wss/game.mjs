@@ -242,6 +242,10 @@ export default class Game {
 		this.pointsTo = 11;
 	}
 
+	get usernames () {
+		return this.players.map(x => x.username);
+	}
+
 	get full () {
 		return this.players.length === 2;
 	}
@@ -251,7 +255,6 @@ export default class Game {
 	get gameData () {
 
 		const playerPositions = this.players.map(x => x.paddle.position);
-		const usernames = this.players.map(x => x.username);
 		const playerW = this.players.map(x => x.paddle.width);
 		const playerH = this.players.map(x => x.paddle.height);
 
@@ -262,7 +265,7 @@ export default class Game {
 			ballPosition: this.ball.position,
 			ballSize: this.ball.size,
 			score: this.score,
-			usernames
+			usernames: this.usernames,
 		};
 
 		return data;
@@ -296,10 +299,10 @@ export default class Game {
 			reason: 'disconnect',
 			score: this.score,
 			winner: (disconnected + 1) % this.players.length,
-			usernames: this.players.map(x => x.username),
+			usernames: this.usernames,
 		}
 
-		if (this.full) data.eloChange = await this.gameOverCallback(...this.players.map(x => { return { username: x.username } }), data.winner);
+		if (this.full) data.eloChange = await this.gameOverCallback(...this.usernames.map(x => { return { username: x } }), data.winner);
 
 		// send results & disconnect players
 		for (const i of this.players) {
@@ -331,10 +334,10 @@ export default class Game {
 			reason: 'win',
 			score: this.score,
 			winner: this.score[0] > this.score[1] ? 0 : 1,
-			usernames: this.players.map(x => x.username),
+			usernames: this.usernames,
 		}
 
-		data.eloChange = await this.gameOverCallback(...this.players.map(x => { return { username: x.username } }), data.winner);
+		data.eloChange = await this.gameOverCallback(...this.usernames.map(x => { return { username: x } }), data.winner);
 
 		for (const i of this.players) {
 			data.iAm = i.playerNumber;
@@ -345,10 +348,9 @@ export default class Game {
 	}
 
 	handleLogging () {
-		let dat = this.players.map(x => x.username);
-		if (lastLogged !== JSON.stringify(dat)) {
-			console.log(dat);
-			lastLogged = JSON.stringify(dat);
+		if (lastLogged !== JSON.stringify(this.usernames)) {
+			console.log(this.usernames);
+			lastLogged = JSON.stringify(this.usernames);
 		}
 	}
 
