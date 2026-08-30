@@ -17,7 +17,7 @@ import http from 'http';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const port = 8000;
+const PORT = process.env.PORT || 8000;
 const app = express();
 const server = http.createServer(app);
 
@@ -105,8 +105,8 @@ async function startServer () {
 	try {
 		await db.connectToDatabase();
 
-		server.listen(port, () => {
-			console.log(`Server running on port ${port}`);
+		server.listen(PORT, () => {
+			console.log(`Server running on port ${PORT}`);
 		});
 	} catch (e) {
 		throw(e);
