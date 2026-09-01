@@ -67,7 +67,7 @@ webSocketServer.on('connection', (socket) => {
 
 	if (!result) return socket.close(1000, "lobby full");
 
-	game.onOver(async (playerA, playerB, winner) => {
+	game.onOver(async (playerA, playerB, score, maxScore) => {
 		const users = db.getCollection('users');
 
 		const data = await Promise.all([
@@ -78,7 +78,7 @@ webSocketServer.on('connection', (socket) => {
 		if (isNaN(data[0].elo)) data[0].elo = 0;
 		if (isNaN(data[1].elo)) data[1].elo = 0;
 
-		const newElos = calculateELO(data[0].elo, data[1].elo, winner);
+		const newElos = calculateELO(data[0].elo, data[1].elo, score, maxScore);
 
 		users.updateOne({ username: playerA.username }, { $set: { elo: Math.max(0, newElos[0])} });
 		users.updateOne({ username: playerB.username }, { $set: { elo: Math.max(0, newElos[1])} });

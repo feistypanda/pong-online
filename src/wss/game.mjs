@@ -302,7 +302,9 @@ export default class Game {
 			usernames: this.usernames,
 		}
 
-		if (this.full) data.eloChange = await this.gameOverCallback(...this.usernames.map(x => { return { username: x } }), data.winner);
+		let score = [0, 0];
+		score[data.winner] = 11;
+		if (this.full) data.eloChange = await this.gameOverCallback(...this.usernames.map(x => { return { username: x } }), score, 11);
 
 		// send results & disconnect players
 		for (const i of this.players) {
@@ -337,7 +339,7 @@ export default class Game {
 			usernames: this.usernames,
 		}
 
-		data.eloChange = await this.gameOverCallback(...this.usernames.map(x => { return { username: x } }), data.winner);
+		data.eloChange = await this.gameOverCallback(...this.usernames.map(x => { return { username: x } }), this.score, Math.max(...this.score, this.pointsTo));
 
 		for (const i of this.players) {
 			data.iAm = i.playerNumber;
@@ -384,7 +386,6 @@ export default class Game {
 		for (const i of this.players) {
 			if (performance.now() - i.lastPingTime > 3000) i.socket.close(1000, "inactive");
 		}
-		
 	}
 
 	run (dt) {

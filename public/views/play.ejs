@@ -325,7 +325,7 @@ function connectToServer () {
 	ws.onclose = (event) => {
 		console.log('disconnected');
 		connected = false;
-
+		console.log(event);
 		if (event.reason !== 'game over' && event.code === 1000) {
 			const url = new URL(`http://${window.location.host}/results`);
 			const params = url.searchParams;
