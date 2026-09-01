@@ -10,6 +10,8 @@ export const webSocketServer = new WebSocketServer({ noServer: true });
 export function verifyWSSConnection (request, socket, head) {
 	const token = request.headers['sec-websocket-protocol'];
 
+	console.log('socket attempting connect');
+
 	verifyToken(token).then(decoded => {
 
 		webSocketServer.handleUpgrade(request, socket, head, (socket) => {
