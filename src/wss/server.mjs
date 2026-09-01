@@ -20,6 +20,7 @@ export function verifyWSSConnection (request, socket, head) {
 		});
 
 	}).catch(e => {
+		console.log('unverified');
 		socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
 		socket.destroy();
 		return;
@@ -46,7 +47,14 @@ let gameLoop = setInterval(() => {
 webSocketServer.on('connection', (socket) => {
 
 	// check to see if the player is already in a game
-	for (const i of games) for (const j of i.usernames) if (j === socket.username) return socket.close(1000, "Already in game")
+	for (const i of games) {
+		for (const j of i.usernames) {
+			if (j === socket.username) {
+				console.log('already in game');
+				return socket.close(1000, "Already in game");
+			}
+		}
+	}
 
 	let result = false;
 	let game;
