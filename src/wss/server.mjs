@@ -1,4 +1,6 @@
 
+console.log('FILE LOADED')
+
 import { WebSocketServer } from 'ws';
 import { verifyToken } from '../utils/tokenUtils.mjs';
 import Game from './game.mjs';
