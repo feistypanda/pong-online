@@ -285,9 +285,13 @@ const userInput = (() => {
     }
 
     function sendDirection () {
-    	if (keys.w && keys.s || !keys.w && !keys.s) sendMessage ('');
-    	else if (keys.w) sendMessage ('up');
-    	else if (keys.s) sendMessage ('down');
+
+    	let up = keys.w || keys.ArrowUp;
+    	let dn = keys.s || keys.ArrowDown;
+
+    	if (up && dn || !up && !dn) sendMessage ('');
+    	else if (up) sendMessage ('up');
+    	else if (dn) sendMessage ('down');
     }
 
     keyPressed = function() {

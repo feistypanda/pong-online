@@ -1,6 +1,3 @@
-
-console.log('FILE LOADED')
-
 import { WebSocketServer } from 'ws';
 import { verifyToken } from '../utils/tokenUtils.mjs';
 import Game from './game.mjs';
@@ -12,15 +9,11 @@ export const webSocketServer = new WebSocketServer({ noServer: true });
 export function verifyWSSConnection (request, socket, head) {
 	const token = request.headers['sec-websocket-protocol'];
 
-	console.log('socket attempting connect');
-
 	verifyToken(token).then(decoded => {
 
 		webSocketServer.handleUpgrade(request, socket, head, (socket) => {
 			socket.username = decoded.username;
 			socket.id = decoded.id;
-
-			console.log('connecting', socket.username);
 
 			webSocketServer.emit('connection', socket, request);
 		});
@@ -52,8 +45,6 @@ let gameLoop = setInterval(() => {
 
 webSocketServer.on('connection', (socket) => {
 
-	console.log('detected connection')
-
 	// check to see if the player is already in a game
 	for (const i of games) {
 		for (const j of i.usernames) {
@@ -82,8 +73,6 @@ webSocketServer.on('connection', (socket) => {
 	}
 
 	if (!result) return socket.close(1000, "lobby full");
-
-	console.log('added to game');
 
 	game.onOver(async (playerA, playerB, score, maxScore) => {
 		const users = db.getCollection('users');

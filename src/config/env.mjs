@@ -8,7 +8,7 @@ let data = {
 		expiresIn: 43200,
 	},
 	db: {
-		uri: 'mongodb://127.0.0.1:50079/?directConnection=true',
+		uri: 'mongodb://127.0.0.1:50079/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.9.2',
 	}
 };
 
